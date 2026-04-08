@@ -1,0 +1,2170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>CookCraft – Recipe App</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FDF6EC;
+    --warm-bg: #FFF9F2;
+    --orange: #FF6B35;
+    --orange-light: #FF8C5A;
+    --orange-pale: #FFF0E8;
+    --gold: #F4A435;
+    --gold-light: #FFF4DC;
+    --green: #3BAF7A;
+    --green-pale: #E8F8F1;
+    --red: #E84B3A;
+    --red-pale: #FDECEA;
+    --dark: #1A1207;
+    --text: #2D2010;
+    --muted: #8C7A6B;
+    --border: #EDE3D8;
+    --card-shadow: 0 4px 24px rgba(26,18,7,0.08);
+    --card-shadow-hover: 0 12px 40px rgba(255,107,53,0.18);
+    --radius: 18px;
+    --radius-sm: 10px;
+    --font-display: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--warm-bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  /* PHONE SHELL */
+  .phone-shell {
+    width: 390px;
+    min-height: 100vh;
+    background: var(--warm-bg);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 60px rgba(0,0,0,0.18);
+  }
+
+  @media (max-width: 420px) {
+    .phone-shell { width: 100vw; box-shadow: none; }
+  }
+
+  /* STATUS BAR */
+  .status-bar {
+    height: 44px;
+    background: var(--cream);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .status-icons { display: flex; gap: 6px; align-items: center; }
+
+  /* SCREENS */
+  .screen { display: none; flex-direction: column; height: calc(100vh - 44px - 72px); overflow-y: auto; padding-bottom: 16px; scroll-behavior: smooth; }
+  .screen.active { display: flex; }
+
+  /* SCROLLBAR */
+  .screen::-webkit-scrollbar { width: 0; }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: sticky;
+    bottom: 0;
+    height: 72px;
+    background: #fff;
+    display: flex;
+    border-top: 1px solid var(--border);
+    z-index: 200;
+    box-shadow: 0 -4px 20px rgba(26,18,7,0.06);
+  }
+
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+
+  .nav-item svg { transition: all 0.25s ease; }
+  .nav-item span { font-size: 10px; font-weight: 500; color: var(--muted); transition: color 0.2s; }
+
+  .nav-item.active span { color: var(--orange); font-weight: 600; }
+  .nav-item.active svg { filter: none; transform: translateY(-2px); }
+
+  .nav-dot {
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--orange);
+    position: absolute;
+    bottom: 6px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .nav-item.active .nav-dot { opacity: 1; }
+
+  /* ── HOME SCREEN ── */
+  .home-header {
+    background: linear-gradient(160deg, #FF6B35 0%, #F4A435 100%);
+    padding: 20px 20px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .home-header::before {
+    content: '';
+    position: absolute;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    top: -60px; right: -40px;
+  }
+
+  .home-header::after {
+    content: '';
+    position: absolute;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    bottom: -40px; left: 30px;
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+
+  .greeting { color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 400; }
+  .user-name { color: #fff; font-size: 18px; font-weight: 700; font-family: var(--font-display); }
+
+  .avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    border: 2px solid rgba(255,255,255,0.5);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+  }
+
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    border-radius: 14px;
+    padding: 12px 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    position: relative;
+    z-index: 1;
+  }
+
+  .search-bar input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--text);
+    background: transparent;
+  }
+
+  .search-bar input::placeholder { color: var(--muted); }
+
+  .filter-btn {
+    width: 32px; height: 32px;
+    background: var(--orange-pale);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; border: none;
+    flex-shrink: 0;
+  }
+
+  /* SECTION TITLES */
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 20px 12px;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  .see-all {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--orange);
+    cursor: pointer;
+    background: var(--orange-pale);
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  /* CATEGORY SCROLL */
+  .categories-scroll {
+    display: flex;
+    gap: 10px;
+    padding: 4px 20px 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .categories-scroll::-webkit-scrollbar { display: none; }
+
+  .cat-chip {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.22s ease;
+    white-space: nowrap;
+    border: 1.5px solid var(--border);
+    background: #fff;
+    color: var(--muted);
+  }
+
+  .cat-chip.active {
+    background: var(--orange);
+    color: #fff;
+    border-color: var(--orange);
+    box-shadow: 0 4px 12px rgba(255,107,53,0.3);
+  }
+
+  .cat-chip span { font-size: 16px; }
+
+  /* FEATURED BANNER */
+  .featured-banner {
+    margin: 4px 20px 0;
+    border-radius: var(--radius);
+    overflow: hidden;
+    position: relative;
+    height: 200px;
+    cursor: pointer;
+    box-shadow: var(--card-shadow);
+  }
+
+  .featured-banner img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+
+  .featured-banner:hover img { transform: scale(1.05); }
+
+  .featured-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(26,18,7,0.85) 0%, transparent 55%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 16px;
+  }
+
+  .featured-tag {
+    display: inline-block;
+    background: var(--orange);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 20px;
+    margin-bottom: 6px;
+    width: fit-content;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .featured-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.25;
+    margin-bottom: 8px;
+  }
+
+  .featured-meta {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+  }
+
+  .featured-meta span {
+    font-size: 12px;
+    color: rgba(255,255,255,0.8);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* RECIPE CARDS HORIZONTAL SCROLL */
+  .cards-scroll {
+    display: flex;
+    gap: 14px;
+    padding: 4px 20px 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .cards-scroll::-webkit-scrollbar { display: none; }
+
+  .recipe-card {
+    flex-shrink: 0;
+    width: 160px;
+    background: #fff;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+  }
+
+  .recipe-card:hover {
+    box-shadow: var(--card-shadow-hover);
+    transform: translateY(-3px);
+  }
+
+  .recipe-card-img {
+    width: 100%;
+    height: 110px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .recipe-card-body { padding: 10px 12px 12px; }
+
+  .recipe-card-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dark);
+    line-height: 1.35;
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .recipe-card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .recipe-time {
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .recipe-rating {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .heart-btn {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 28px; height: 28px;
+    background: rgba(255,255,255,0.92);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    transition: all 0.2s;
+    font-size: 13px;
+  }
+
+  .heart-btn.liked { background: var(--red-pale); }
+  .heart-btn:active { transform: scale(0.88); }
+
+  /* GRID LAYOUT */
+  .recipe-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    padding: 4px 20px 8px;
+  }
+
+  .recipe-grid-card {
+    background: #fff;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+  }
+
+  .recipe-grid-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--card-shadow-hover);
+  }
+
+  .recipe-grid-card img {
+    width: 100%;
+    height: 110px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .recipe-grid-body { padding: 10px 12px 12px; }
+
+  .recipe-grid-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dark);
+    line-height: 1.3;
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 20px;
+    margin-bottom: 6px;
+  }
+
+  .badge-green { background: var(--green-pale); color: var(--green); }
+  .badge-orange { background: var(--orange-pale); color: var(--orange); }
+  .badge-gold { background: var(--gold-light); color: #B07800; }
+
+  /* ── DETAIL SCREEN ── */
+  .detail-screen { display: none; flex-direction: column; }
+  .detail-screen.active { display: flex; }
+
+  .detail-hero {
+    position: relative;
+    height: 280px;
+    overflow: hidden;
+  }
+
+  .detail-hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .detail-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(26,18,7,0.7) 0%, transparent 60%);
+  }
+
+  .back-btn {
+    position: absolute;
+    top: 14px; left: 16px;
+    width: 38px; height: 38px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    font-size: 16px;
+    z-index: 10;
+    transition: all 0.2s;
+  }
+
+  .back-btn:active { transform: scale(0.9); }
+
+  .detail-fav-btn {
+    position: absolute;
+    top: 14px; right: 16px;
+    width: 38px; height: 38px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    font-size: 16px;
+    z-index: 10;
+    transition: all 0.2s;
+  }
+
+  .detail-hero-info {
+    position: absolute;
+    bottom: 16px; left: 16px; right: 16px;
+  }
+
+  .detail-tag {
+    display: inline-block;
+    background: var(--orange);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 20px;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .detail-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.2;
+  }
+
+  .detail-body { padding: 20px; flex: 1; overflow-y: auto; }
+  .detail-body::-webkit-scrollbar { width: 0; }
+
+  .detail-stats {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .stat-chip {
+    flex: 1;
+    background: #fff;
+    border-radius: 14px;
+    padding: 10px 8px;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+  }
+
+  .stat-chip .stat-icon { font-size: 18px; margin-bottom: 4px; }
+  .stat-chip .stat-val { font-size: 13px; font-weight: 700; color: var(--dark); }
+  .stat-chip .stat-label { font-size: 10px; color: var(--muted); }
+
+  .detail-rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    background: var(--gold-light);
+    padding: 10px 14px;
+    border-radius: 12px;
+  }
+
+  .stars { color: var(--gold); font-size: 16px; letter-spacing: 1px; }
+  .rating-val { font-size: 16px; font-weight: 700; color: var(--dark); }
+  .rating-count { font-size: 12px; color: var(--muted); }
+
+  .detail-section-title {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 14px;
+  }
+
+  .ingredient-list { list-style: none; margin-bottom: 24px; }
+  .ingredient-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+
+  .ingredient-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--orange);
+    flex-shrink: 0;
+  }
+
+  .ingredient-name { flex: 1; color: var(--text); }
+  .ingredient-amount { color: var(--muted); font-size: 13px; font-weight: 500; }
+
+  .step-list { list-style: none; margin-bottom: 28px; }
+  .step-item {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .step-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--orange);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .step-text { font-size: 14px; color: var(--text); line-height: 1.6; }
+
+  .add-fav-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--orange), var(--orange-light));
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    padding: 16px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: var(--font-body);
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(255,107,53,0.35);
+    transition: all 0.25s;
+    margin-bottom: 20px;
+  }
+
+  .add-fav-btn:active { transform: scale(0.97); }
+
+  /* VIDEO SECTION */
+  .video-section {
+    background: var(--dark);
+    border-radius: var(--radius);
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .video-play {
+    width: 52px; height: 52px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    backdrop-filter: blur(4px);
+    border: 2px solid rgba(255,255,255,0.3);
+    z-index: 1;
+  }
+
+  .video-label {
+    position: absolute;
+    bottom: 12px; left: 16px;
+    color: rgba(255,255,255,0.8);
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  /* ── CATEGORIES SCREEN ── */
+  .cat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    padding: 16px 20px;
+  }
+
+  .cat-card {
+    border-radius: var(--radius);
+    overflow: hidden;
+    height: 120px;
+    position: relative;
+    cursor: pointer;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.25s;
+  }
+
+  .cat-card:hover { transform: translateY(-3px); }
+  .cat-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .cat-card-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 12px;
+  }
+
+  .cat-card-name {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  }
+
+  .cat-card-count {
+    font-size: 11px;
+    color: rgba(255,255,255,0.8);
+    margin-top: 2px;
+  }
+
+  /* ── FAVORITES SCREEN ── */
+  .favorites-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 40px 30px;
+    text-align: center;
+  }
+
+  .empty-icon { font-size: 64px; }
+  .empty-title { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--dark); }
+  .empty-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  .fav-recipe-row {
+    display: flex;
+    gap: 14px;
+    padding: 12px 20px;
+    background: #fff;
+    border-radius: var(--radius);
+    margin: 0 20px 12px;
+    box-shadow: var(--card-shadow);
+    cursor: pointer;
+    transition: all 0.2s;
+    align-items: center;
+  }
+
+  .fav-recipe-row:hover { transform: translateX(4px); }
+  .fav-recipe-row:active { transform: scale(0.98); }
+
+  .fav-recipe-img {
+    width: 70px; height: 70px;
+    border-radius: 12px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .fav-recipe-info { flex: 1; }
+  .fav-recipe-name { font-size: 14px; font-weight: 600; color: var(--dark); margin-bottom: 5px; }
+  .fav-recipe-meta { font-size: 12px; color: var(--muted); display: flex; gap: 10px; }
+
+  .remove-fav {
+    background: var(--red-pale);
+    color: var(--red);
+    border: none;
+    border-radius: 8px;
+    padding: 6px 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+
+  /* ── PROFILE SCREEN ── */
+  .profile-header-section {
+    background: linear-gradient(160deg, #FF6B35 0%, #F4A435 100%);
+    padding: 30px 20px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .profile-avatar {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    border: 3px solid rgba(255,255,255,0.6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+    margin: 0 auto 12px;
+  }
+
+  .profile-name { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .profile-email { font-size: 13px; color: rgba(255,255,255,0.8); }
+
+  .profile-stats {
+    display: flex;
+    margin: -20px 20px 0;
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+    position: relative;
+    z-index: 5;
+  }
+
+  .profile-stat {
+    flex: 1;
+    text-align: center;
+    padding: 16px 8px;
+  }
+
+  .profile-stat + .profile-stat { border-left: 1px solid var(--border); }
+  .profile-stat-val { font-size: 20px; font-weight: 700; color: var(--orange); font-family: var(--font-display); }
+  .profile-stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .profile-menu { padding: 24px 20px 0; }
+
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: #fff;
+    border-radius: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(26,18,7,0.05);
+    transition: all 0.2s;
+  }
+
+  .menu-item:hover { transform: translateX(4px); }
+
+  .menu-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .menu-label { flex: 1; font-size: 14px; font-weight: 500; color: var(--text); }
+  .menu-arrow { color: var(--muted); font-size: 14px; }
+
+  /* SCREEN HEADER */
+  .screen-header {
+    background: var(--cream);
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .screen-header-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--dark);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 999;
+    white-space: nowrap;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* QUICK STATS BAR */
+  .quick-stats {
+    display: flex;
+    gap: 10px;
+    padding: 8px 20px;
+  }
+
+  .qstat {
+    flex: 1;
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px 8px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(26,18,7,0.06);
+  }
+
+  .qstat-icon { font-size: 20px; }
+  .qstat-num { font-size: 16px; font-weight: 700; color: var(--dark); font-family: var(--font-display); }
+  .qstat-label { font-size: 10px; color: var(--muted); }
+
+  /* ANIMATIONS */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .screen.active > * {
+    animation: fadeInUp 0.35s ease forwards;
+  }
+
+  .screen.active > *:nth-child(2) { animation-delay: 0.05s; }
+  .screen.active > *:nth-child(3) { animation-delay: 0.10s; }
+  .screen.active > *:nth-child(4) { animation-delay: 0.15s; }
+  .screen.active > *:nth-child(5) { animation-delay: 0.20s; }
+  .screen.active > *:nth-child(6) { animation-delay: 0.25s; }
+  .screen.active > *:nth-child(7) { animation-delay: 0.30s; }
+
+  /* FILTER MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 500;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal-sheet {
+    background: #fff;
+    border-radius: 24px 24px 0 0;
+    padding: 24px 20px 36px;
+    width: 390px;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  @media (max-width: 420px) {
+    .modal-sheet { width: 100%; }
+  }
+
+  .modal-handle {
+    width: 36px; height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    margin: 0 auto 20px;
+  }
+
+  .modal-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; margin-bottom: 20px; color: var(--dark); }
+
+  .filter-group { margin-bottom: 20px; }
+  .filter-group-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+
+  .filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .fchip {
+    padding: 7px 14px;
+    border-radius: 50px;
+    font-size: 13px;
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.2s;
+    background: #fff;
+    font-family: var(--font-body);
+  }
+
+  .fchip.selected { background: var(--orange); color: #fff; border-color: var(--orange); }
+
+  .apply-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--orange), var(--orange-light));
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    padding: 15px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: var(--font-body);
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(255,107,53,0.3);
+    transition: all 0.25s;
+  }
+
+  /* NOTIFICATION DOT */
+  .notif-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--red);
+    position: absolute;
+    top: 2px; right: 2px;
+    border: 1.5px solid #fff;
+  }
+</style>
+</head>
+<body>
+
+<div class="phone-shell" id="app">
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span>9:41</span>
+    <span style="font-size:13px;">CookCraft 🍳</span>
+    <div class="status-icons">
+      <span>●●●</span>
+      <span>WiFi</span>
+      <span>🔋</span>
+    </div>
+  </div>
+
+  <!-- ══════════ HOME SCREEN ══════════ -->
+  <div class="screen active" id="screen-home">
+
+    <!-- Header -->
+    <div class="home-header">
+      <div class="header-top">
+        <div>
+          <div class="greeting">Good morning, Chef!</div>
+          <div class="user-name">What will you cook today?</div>
+        </div>
+        <div class="avatar" onclick="navigate('profile')">👨‍🍳
+          <div class="notif-dot"></div>
+        </div>
+      </div>
+      <!-- Search -->
+      <div class="search-bar" onclick="focusSearch()">
+        <svg width="16" height="16" fill="none" stroke="#8C7A6B" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="search-input" placeholder="Search recipes, ingredients…" oninput="handleSearch(this.value)">
+        <button class="filter-btn" onclick="openFilter()">
+          <svg width="14" height="14" fill="none" stroke="#FF6B35" stroke-width="2" viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="quick-stats">
+      <div class="qstat">
+        <div class="qstat-icon">🍽️</div>
+        <div class="qstat-num">247</div>
+        <div class="qstat-label">Recipes</div>
+      </div>
+      <div class="qstat">
+        <div class="qstat-icon">⭐</div>
+        <div class="qstat-num">4.8</div>
+        <div class="qstat-label">Avg Rating</div>
+      </div>
+      <div class="qstat">
+        <div class="qstat-icon">❤️</div>
+        <div class="qstat-num" id="fav-count-home">0</div>
+        <div class="qstat-label">Saved</div>
+      </div>
+    </div>
+
+    <!-- Categories -->
+    <div>
+      <div class="section-header">
+        <div class="section-title">Categories</div>
+      </div>
+      <div class="categories-scroll" id="cat-scroll">
+        <div class="cat-chip active" data-cat="All" onclick="filterCategory(this, 'All')"><span>🍽️</span> All</div>
+        <div class="cat-chip" data-cat="Breakfast" onclick="filterCategory(this, 'Breakfast')"><span>🌅</span> Breakfast</div>
+        <div class="cat-chip" data-cat="Lunch" onclick="filterCategory(this, 'Lunch')"><span>☀️</span> Lunch</div>
+        <div class="cat-chip" data-cat="Dinner" onclick="filterCategory(this, 'Dinner')"><span>🌙</span> Dinner</div>
+        <div class="cat-chip" data-cat="Snacks" onclick="filterCategory(this, 'Snacks')"><span>🍿</span> Snacks</div>
+        <div class="cat-chip" data-cat="Desserts" onclick="filterCategory(this, 'Desserts')"><span>🍰</span> Desserts</div>
+        <div class="cat-chip" data-cat="Drinks" onclick="filterCategory(this, 'Drinks')"><span>🥤</span> Drinks</div>
+      </div>
+    </div>
+
+    <!-- Featured Recipe -->
+    <div class="section-header">
+      <div class="section-title">Featured Today</div>
+      <div class="see-all" onclick="navigate('categories')">See all</div>
+    </div>
+    <div class="featured-banner" onclick="openRecipe(0)">
+      <img src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800&q=80" alt="Featured Recipe" loading="lazy">
+      <div class="featured-overlay">
+        <div class="featured-tag">⚡ Featured</div>
+        <div class="featured-title">Classic Eggs Benedict with Hollandaise</div>
+        <div class="featured-meta">
+          <span>⏱ 25 min</span>
+          <span>⭐ 4.9</span>
+          <span>👥 2 servings</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Popular Recipes -->
+    <div class="section-header">
+      <div class="section-title">🔥 Popular Now</div>
+      <div class="see-all">See all</div>
+    </div>
+    <div class="cards-scroll" id="popular-scroll"></div>
+
+    <!-- Quick (Under 30min) -->
+    <div class="section-header">
+      <div class="section-title">⚡ Quick Recipes</div>
+      <div class="see-all">See all</div>
+    </div>
+    <div class="cards-scroll" id="quick-scroll"></div>
+
+    <!-- Trending -->
+    <div class="section-header">
+      <div class="section-title">📈 Trending</div>
+      <div class="see-all">See all</div>
+    </div>
+    <div class="recipe-grid" id="trending-grid"></div>
+
+    <!-- Healthy -->
+    <div class="section-header">
+      <div class="section-title">🥗 Healthy Picks</div>
+      <div class="see-all">See all</div>
+    </div>
+    <div class="cards-scroll" id="healthy-scroll"></div>
+
+  </div>
+
+  <!-- ══════════ CATEGORIES SCREEN ══════════ -->
+  <div class="screen" id="screen-categories">
+    <div class="screen-header">
+      <div class="screen-header-title">🍽️ All Categories</div>
+    </div>
+    <div class="cat-grid" id="cat-grid"></div>
+    <div class="section-header">
+      <div class="section-title">All Recipes</div>
+    </div>
+    <div class="recipe-grid" id="all-recipes-grid"></div>
+  </div>
+
+  <!-- ══════════ FAVORITES SCREEN ══════════ -->
+  <div class="screen" id="screen-favorites">
+    <div class="screen-header">
+      <div class="screen-header-title">❤️ My Favorites</div>
+    </div>
+    <div id="fav-content"></div>
+  </div>
+
+  <!-- ══════════ PROFILE SCREEN ══════════ -->
+  <div class="screen" id="screen-profile">
+    <div class="profile-header-section">
+      <div class="profile-avatar">👨‍🍳</div>
+      <div class="profile-name">Alex Johnson</div>
+      <div class="profile-email">alex.johnson@email.com</div>
+    </div>
+    <div class="profile-stats">
+      <div class="profile-stat">
+        <div class="profile-stat-val" id="profile-recipes-cooked">12</div>
+        <div class="profile-stat-label">Cooked</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-val" id="profile-fav-count">0</div>
+        <div class="profile-stat-label">Saved</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-val">4.8</div>
+        <div class="profile-stat-label">Avg Rating</div>
+      </div>
+    </div>
+    <div class="profile-menu">
+      <div class="menu-item">
+        <div class="menu-icon" style="background:#FFF0E8;">🍳</div>
+        <div class="menu-label">My Recipes</div>
+        <div class="menu-arrow">›</div>
+      </div>
+      <div class="menu-item">
+        <div class="menu-icon" style="background:#E8F8F1;">🛒</div>
+        <div class="menu-label">Shopping List</div>
+        <div class="menu-arrow">›</div>
+      </div>
+      <div class="menu-item">
+        <div class="menu-icon" style="background:#FFF4DC;">📅</div>
+        <div class="menu-label">Meal Planner</div>
+        <div class="menu-arrow">›</div>
+      </div>
+      <div class="menu-item">
+        <div class="menu-icon" style="background:#FDECEA;">🔔</div>
+        <div class="menu-label">Notifications</div>
+        <div class="menu-arrow">›</div>
+      </div>
+      <div class="menu-item">
+        <div class="menu-icon" style="background:#F0F0FF;">🌙</div>
+        <div class="menu-label">Dark Mode</div>
+        <div class="menu-arrow" id="dark-toggle" onclick="toggleDark()" style="cursor:pointer;font-size:20px;">🌙</div>
+      </div>
+      <div class="menu-item">
+        <div class="menu-icon" style="background:#F5F5F5;">⚙️</div>
+        <div class="menu-label">Settings</div>
+        <div class="menu-arrow">›</div>
+      </div>
+      <div class="menu-item" style="margin-top:8px;" onclick="showToast('Logged out successfully')">
+        <div class="menu-icon" style="background:#FDECEA;">🚪</div>
+        <div class="menu-label" style="color:#E84B3A;">Log Out</div>
+        <div class="menu-arrow">›</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ DETAIL SCREEN ══════════ -->
+  <div class="detail-screen" id="screen-detail">
+    <div class="detail-hero">
+      <img id="detail-img" src="" alt="">
+      <div class="detail-hero-overlay"></div>
+      <button class="back-btn" onclick="closeDetail()">←</button>
+      <button class="detail-fav-btn" id="detail-fav-btn" onclick="toggleDetailFav()">🤍</button>
+      <div class="detail-hero-info">
+        <div class="detail-tag" id="detail-tag">Breakfast</div>
+        <div class="detail-title" id="detail-title"></div>
+      </div>
+    </div>
+    <div class="detail-body" id="detail-body"></div>
+  </div>
+
+  <!-- ══════════ BOTTOM NAV ══════════ -->
+  <nav class="bottom-nav" id="bottom-nav">
+    <div class="nav-item active" id="nav-home" onclick="navigate('home')">
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" stroke="#FF6B35" stroke-width="2" fill="none"/><path d="M9 21V12h6v9" stroke="#FF6B35" stroke-width="2"/></svg>
+      <span>Home</span>
+      <div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" id="nav-categories" onclick="navigate('categories')">
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" stroke="#8C7A6B" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="#8C7A6B" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="#8C7A6B" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke="#8C7A6B" stroke-width="2"/></svg>
+      <span>Categories</span>
+      <div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" id="nav-favorites" onclick="navigate('favorites')">
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="#8C7A6B" stroke-width="2"/></svg>
+      <span>Favorites</span>
+      <div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" id="nav-profile" onclick="navigate('profile')">
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="#8C7A6B" stroke-width="2"/><circle cx="12" cy="7" r="4" stroke="#8C7A6B" stroke-width="2"/></svg>
+      <span>Profile</span>
+      <div class="nav-dot"></div>
+    </div>
+  </nav>
+
+</div>
+
+<!-- FILTER MODAL -->
+<div class="modal-overlay" id="filter-modal" onclick="closeFilter(event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Filter Recipes</div>
+    <div class="filter-group">
+      <div class="filter-group-label">Category</div>
+      <div class="filter-chips">
+        <button class="fchip selected" onclick="toggleFchip(this)">All</button>
+        <button class="fchip" onclick="toggleFchip(this)">Breakfast</button>
+        <button class="fchip" onclick="toggleFchip(this)">Lunch</button>
+        <button class="fchip" onclick="toggleFchip(this)">Dinner</button>
+        <button class="fchip" onclick="toggleFchip(this)">Desserts</button>
+        <button class="fchip" onclick="toggleFchip(this)">Drinks</button>
+      </div>
+    </div>
+    <div class="filter-group">
+      <div class="filter-group-label">Cooking Time</div>
+      <div class="filter-chips">
+        <button class="fchip" onclick="toggleFchip(this)">Under 15 min</button>
+        <button class="fchip selected" onclick="toggleFchip(this)">Under 30 min</button>
+        <button class="fchip" onclick="toggleFchip(this)">Under 1 hour</button>
+        <button class="fchip" onclick="toggleFchip(this)">1+ hours</button>
+      </div>
+    </div>
+    <div class="filter-group">
+      <div class="filter-group-label">Difficulty</div>
+      <div class="filter-chips">
+        <button class="fchip selected" onclick="toggleFchip(this)">Easy</button>
+        <button class="fchip" onclick="toggleFchip(this)">Medium</button>
+        <button class="fchip" onclick="toggleFchip(this)">Hard</button>
+      </div>
+    </div>
+    <button class="apply-btn" onclick="applyFilter()">Apply Filters</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════
+// DATA
+// ══════════════════════════════
+const recipes = [
+  {
+    id: 0,
+    name: "Classic Eggs Benedict with Hollandaise",
+    category: "Breakfast",
+    time: "25 min",
+    servings: 2,
+    rating: 4.9,
+    reviews: 312,
+    difficulty: "Medium",
+    image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800&q=80",
+    badge: "Featured",
+    badgeColor: "badge-orange",
+    description: "A classic brunch dish with poached eggs, Canadian bacon, and rich hollandaise sauce served on toasted English muffins.",
+    ingredients: [
+      { name: "English Muffins", amount: "2 pieces" },
+      { name: "Eggs", amount: "4 large" },
+      { name: "Canadian Bacon", amount: "4 slices" },
+      { name: "Butter", amount: "½ cup (1 stick)" },
+      { name: "Egg Yolks", amount: "3 yolks" },
+      { name: "Lemon Juice", amount: "1 tbsp" },
+      { name: "White Vinegar", amount: "1 tbsp" },
+      { name: "Salt & Pepper", amount: "to taste" },
+      { name: "Fresh Chives", amount: "for garnish" },
+    ],
+    steps: [
+      "Make the Hollandaise: Whisk egg yolks and lemon juice in a double boiler until thickened and doubled in volume.",
+      "Slowly drizzle in clarified butter while whisking constantly until sauce is creamy. Season with salt, cayenne, and lemon.",
+      "Toast English muffins until golden. Warm Canadian bacon in a pan until lightly browned.",
+      "Poach eggs: Bring water to a gentle simmer with vinegar. Create a swirl and gently add eggs. Cook 3–4 minutes.",
+      "Assemble: Muffin → bacon → poached egg → generous hollandaise. Garnish with chives and paprika.",
+    ]
+  },
+  {
+    id: 1,
+    name: "Creamy Tuscan Garlic Pasta",
+    category: "Dinner",
+    time: "30 min",
+    servings: 4,
+    rating: 4.8,
+    reviews: 521,
+    difficulty: "Easy",
+    image: "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=800&q=80",
+    badge: "Popular",
+    badgeColor: "badge-orange",
+    description: "Rich and creamy pasta with sun-dried tomatoes, spinach, and aromatic garlic in a luscious cream sauce.",
+    ingredients: [
+      { name: "Fettuccine Pasta", amount: "400g" },
+      { name: "Heavy Cream", amount: "1 cup" },
+      { name: "Garlic Cloves", amount: "5, minced" },
+      { name: "Sun-dried Tomatoes", amount: "½ cup" },
+      { name: "Baby Spinach", amount: "2 cups" },
+      { name: "Parmesan", amount: "½ cup grated" },
+      { name: "Olive Oil", amount: "2 tbsp" },
+      { name: "Italian Seasoning", amount: "1 tsp" },
+    ],
+    steps: [
+      "Cook pasta according to package directions. Reserve 1 cup pasta water before draining.",
+      "Heat olive oil in a large pan. Sauté garlic 1 minute until fragrant.",
+      "Add sun-dried tomatoes and cook 2 minutes. Pour in heavy cream and simmer 3–4 minutes.",
+      "Add spinach and stir until wilted. Add parmesan and stir to combine.",
+      "Toss in cooked pasta with a splash of pasta water. Season and serve hot.",
+    ]
+  },
+  {
+    id: 2,
+    name: "Avocado Toast with Poached Egg",
+    category: "Breakfast",
+    time: "15 min",
+    servings: 1,
+    rating: 4.7,
+    reviews: 289,
+    difficulty: "Easy",
+    image: "https://images.unsplash.com/photo-1494390248081-4e521a5940db?w=800&q=80",
+    badge: "Quick",
+    badgeColor: "badge-green",
+    description: "Trendy and nutritious avocado toast topped with a runny poached egg and chili flakes.",
+    ingredients: [
+      { name: "Sourdough Bread", amount: "2 slices" },
+      { name: "Ripe Avocado", amount: "1 large" },
+      { name: "Eggs", amount: "2" },
+      { name: "Lemon Juice", amount: "1 tsp" },
+      { name: "Red Chili Flakes", amount: "pinch" },
+      { name: "Everything Bagel Seasoning", amount: "1 tsp" },
+      { name: "Salt & Pepper", amount: "to taste" },
+    ],
+    steps: [
+      "Toast sourdough slices until golden and crispy.",
+      "Mash avocado with lemon juice, salt and pepper.",
+      "Poach eggs in simmering water for 3 minutes.",
+      "Spread avocado on toast, top with poached egg, chili flakes and seasoning.",
+    ]
+  },
+  {
+    id: 3,
+    name: "Mango Smoothie Bowl",
+    category: "Breakfast",
+    time: "10 min",
+    servings: 1,
+    rating: 4.6,
+    reviews: 178,
+    difficulty: "Easy",
+    image: "https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?w=800&q=80",
+    badge: "Healthy",
+    badgeColor: "badge-green",
+    description: "Thick, tropical mango smoothie bowl loaded with colorful toppings and superfoods.",
+    ingredients: [
+      { name: "Frozen Mango Chunks", amount: "2 cups" },
+      { name: "Coconut Milk", amount: "¼ cup" },
+      { name: "Banana", amount: "1 frozen" },
+      { name: "Granola", amount: "¼ cup" },
+      { name: "Chia Seeds", amount: "1 tbsp" },
+      { name: "Fresh Berries", amount: "handful" },
+      { name: "Shredded Coconut", amount: "2 tbsp" },
+    ],
+    steps: [
+      "Blend frozen mango, banana and coconut milk until thick and creamy.",
+      "Pour into a bowl.",
+      "Top with granola, berries, chia seeds and coconut.",
+      "Serve immediately.",
+    ]
+  },
+  {
+    id: 4,
+    name: "Butter Chicken (Murgh Makhani)",
+    category: "Dinner",
+    time: "55 min",
+    servings: 4,
+    rating: 4.9,
+    reviews: 741,
+    difficulty: "Medium",
+    image: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=800&q=80",
+    badge: "Trending",
+    badgeColor: "badge-gold",
+    description: "India's most beloved curry – tender chicken in a rich, velvety tomato-cream sauce with aromatic spices.",
+    ingredients: [
+      { name: "Chicken Breast", amount: "700g, cubed" },
+      { name: "Tomato Puree", amount: "1½ cups" },
+      { name: "Heavy Cream", amount: "¾ cup" },
+      { name: "Butter", amount: "3 tbsp" },
+      { name: "Garam Masala", amount: "2 tsp" },
+      { name: "Cumin", amount: "1 tsp" },
+      { name: "Turmeric", amount: "½ tsp" },
+      { name: "Garlic-Ginger Paste", amount: "2 tbsp" },
+      { name: "Basmati Rice", amount: "to serve" },
+    ],
+    steps: [
+      "Marinate chicken with yogurt, garam masala, and garlic-ginger paste for 30 minutes.",
+      "Grill or pan-fry chicken until cooked and slightly charred.",
+      "In the same pan, melt butter and sauté onions until golden.",
+      "Add garlic-ginger paste, spices and tomato puree. Simmer 15 minutes.",
+      "Blend sauce until smooth, return to pan, add cream and chicken. Simmer 10 minutes.",
+    ]
+  },
+  {
+    id: 5,
+    name: "Greek Salad with Feta",
+    category: "Lunch",
+    time: "10 min",
+    servings: 2,
+    rating: 4.5,
+    reviews: 203,
+    difficulty: "Easy",
+    image: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=800&q=80",
+    badge: "Healthy",
+    badgeColor: "badge-green",
+    description: "Crisp vegetables, olives and creamy feta cheese with a bright oregano-lemon dressing.",
+    ingredients: [
+      { name: "Cucumber", amount: "1 large" },
+      { name: "Cherry Tomatoes", amount: "1 cup" },
+      { name: "Kalamata Olives", amount: "½ cup" },
+      { name: "Red Onion", amount: "½, thinly sliced" },
+      { name: "Feta Cheese", amount: "150g" },
+      { name: "Olive Oil", amount: "3 tbsp" },
+      { name: "Lemon Juice", amount: "2 tbsp" },
+      { name: "Dried Oregano", amount: "1 tsp" },
+    ],
+    steps: [
+      "Chop cucumber, halve tomatoes, slice onion.",
+      "Combine all vegetables and olives in a large bowl.",
+      "Whisk olive oil, lemon juice and oregano for dressing.",
+      "Pour dressing over salad. Top with feta. Serve immediately.",
+    ]
+  },
+  {
+    id: 6,
+    name: "Chocolate Lava Cake",
+    category: "Desserts",
+    time: "20 min",
+    servings: 2,
+    rating: 4.9,
+    reviews: 456,
+    difficulty: "Medium",
+    image: "https://images.unsplash.com/photo-1624353365286-3f8d62daad51?w=800&q=80",
+    badge: "Popular",
+    badgeColor: "badge-orange",
+    description: "Decadent individual chocolate cakes with a warm, gooey molten center. Pure indulgence!",
+    ingredients: [
+      { name: "Dark Chocolate", amount: "100g (70%)" },
+      { name: "Butter", amount: "100g" },
+      { name: "Eggs", amount: "2 + 2 yolks" },
+      { name: "Caster Sugar", amount: "100g" },
+      { name: "Plain Flour", amount: "30g" },
+      { name: "Cocoa Powder", amount: "1 tbsp" },
+      { name: "Vanilla Extract", amount: "1 tsp" },
+    ],
+    steps: [
+      "Preheat oven to 200°C. Butter and dust 4 ramekins with cocoa.",
+      "Melt chocolate and butter together. Cool slightly.",
+      "Whisk eggs, yolks and sugar until pale and thick, about 5 minutes.",
+      "Fold chocolate mixture into egg mixture. Sift in flour and fold gently.",
+      "Fill ramekins ¾ full. Bake 10–12 minutes. The edges should be set, center jiggly.",
+      "Rest 1 minute, then run a knife around the edge and invert onto plates.",
+    ]
+  },
+  {
+    id: 7,
+    name: "Spicy Tuna Sushi Rolls",
+    category: "Lunch",
+    time: "45 min",
+    servings: 4,
+    rating: 4.7,
+    reviews: 334,
+    difficulty: "Hard",
+    image: "https://images.unsplash.com/photo-1617196034183-421b4040ed20?w=800&q=80",
+    badge: "Trending",
+    badgeColor: "badge-gold",
+    description: "Restaurant-style spicy tuna rolls with perfectly seasoned sushi rice and crisp nori.",
+    ingredients: [
+      { name: "Sushi Rice", amount: "2 cups" },
+      { name: "Fresh Tuna", amount: "300g" },
+      { name: "Nori Sheets", amount: "4 sheets" },
+      { name: "Sriracha", amount: "2 tbsp" },
+      { name: "Mayonnaise", amount: "3 tbsp" },
+      { name: "Cucumber", amount: "1, julienned" },
+      { name: "Avocado", amount: "1, sliced" },
+      { name: "Rice Vinegar", amount: "3 tbsp" },
+      { name: "Sesame Seeds", amount: "2 tbsp" },
+    ],
+    steps: [
+      "Cook sushi rice, season with vinegar, sugar and salt while hot.",
+      "Mix tuna with sriracha, mayo and sesame oil.",
+      "Lay nori on bamboo mat, spread rice evenly, leaving 1-inch border.",
+      "Place tuna, cucumber and avocado in a line. Roll tightly using the mat.",
+      "Wet seal with water. Refrigerate 10 minutes, then cut with sharp wet knife.",
+    ]
+  },
+  {
+    id: 8,
+    name: "Honey Garlic Salmon",
+    category: "Dinner",
+    time: "20 min",
+    servings: 2,
+    rating: 4.8,
+    reviews: 412,
+    difficulty: "Easy",
+    image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=800&q=80",
+    badge: "Quick",
+    badgeColor: "badge-green",
+    description: "Pan-seared salmon fillets glazed with a sticky honey garlic sauce. Done in 20 minutes!",
+    ingredients: [
+      { name: "Salmon Fillets", amount: "2 (200g each)" },
+      { name: "Honey", amount: "3 tbsp" },
+      { name: "Garlic", amount: "4 cloves, minced" },
+      { name: "Soy Sauce", amount: "2 tbsp" },
+      { name: "Lemon Juice", amount: "1 tbsp" },
+      { name: "Butter", amount: "2 tbsp" },
+      { name: "Fresh Parsley", amount: "for garnish" },
+    ],
+    steps: [
+      "Pat salmon dry, season with salt and pepper.",
+      "Mix honey, soy sauce, garlic and lemon for glaze.",
+      "Heat butter in a skillet over medium-high. Cook salmon skin-side up 4 minutes.",
+      "Flip, pour glaze over. Cook 4 more minutes, basting continuously.",
+      "Remove when salmon flakes easily. Garnish and serve.",
+    ]
+  },
+  {
+    id: 9,
+    name: "Crispy Chicken Tacos",
+    category: "Lunch",
+    time: "35 min",
+    servings: 4,
+    rating: 4.7,
+    reviews: 298,
+    difficulty: "Easy",
+    image: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=800&q=80",
+    badge: "Popular",
+    badgeColor: "badge-orange",
+    description: "Crunchy golden chicken strips in warm tortillas with fresh salsa and creamy avocado crema.",
+    ingredients: [
+      { name: "Chicken Breast", amount: "500g, strips" },
+      { name: "Small Flour Tortillas", amount: "8" },
+      { name: "Panko Breadcrumbs", amount: "1 cup" },
+      { name: "Smoked Paprika", amount: "2 tsp" },
+      { name: "Avocado", amount: "2" },
+      { name: "Lime Juice", amount: "2 limes" },
+      { name: "Sour Cream", amount: "½ cup" },
+      { name: "Salsa", amount: "½ cup" },
+      { name: "Shredded Cabbage", amount: "1 cup" },
+    ],
+    steps: [
+      "Season chicken strips with paprika, cumin, salt.",
+      "Coat in flour, dip in egg, coat in panko breadcrumbs.",
+      "Pan fry in oil until golden and cooked through, about 6 minutes.",
+      "Make crema: blend avocado, lime juice, sour cream.",
+      "Warm tortillas, assemble with chicken, cabbage, salsa and crema.",
+    ]
+  },
+  {
+    id: 10,
+    name: "Matcha Iced Latte",
+    category: "Drinks",
+    time: "5 min",
+    servings: 1,
+    rating: 4.6,
+    reviews: 187,
+    difficulty: "Easy",
+    image: "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=800&q=80",
+    badge: "Quick",
+    badgeColor: "badge-green",
+    description: "Silky smooth matcha blended with oat milk over ice – the perfect energizing drink.",
+    ingredients: [
+      { name: "Matcha Powder", amount: "2 tsp ceremonial grade" },
+      { name: "Hot Water", amount: "2 tbsp (70°C)" },
+      { name: "Oat Milk", amount: "1 cup" },
+      { name: "Simple Syrup", amount: "1–2 tbsp" },
+      { name: "Ice", amount: "handful" },
+    ],
+    steps: [
+      "Whisk matcha with hot water until smooth and frothy, no lumps.",
+      "Fill glass with ice.",
+      "Pour oat milk over ice.",
+      "Drizzle matcha over milk. Add syrup to taste. Stir and enjoy.",
+    ]
+  },
+  {
+    id: 11,
+    name: "Banana Pancakes",
+    category: "Breakfast",
+    time: "20 min",
+    servings: 2,
+    rating: 4.7,
+    reviews: 356,
+    difficulty: "Easy",
+    image: "https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=800&q=80",
+    badge: "Healthy",
+    badgeColor: "badge-green",
+    description: "Fluffy 2-ingredient banana pancakes that are naturally sweet and gluten-free.",
+    ingredients: [
+      { name: "Ripe Bananas", amount: "2 large" },
+      { name: "Eggs", amount: "2" },
+      { name: "Cinnamon", amount: "½ tsp" },
+      { name: "Vanilla Extract", amount: "½ tsp" },
+      { name: "Maple Syrup", amount: "to serve" },
+      { name: "Fresh Berries", amount: "to serve" },
+    ],
+    steps: [
+      "Mash bananas until very smooth.",
+      "Add eggs, cinnamon and vanilla. Mix until combined.",
+      "Heat a non-stick pan over medium with a little butter.",
+      "Drop 2 tablespoons per pancake. Cook 2–3 minutes each side.",
+      "Serve with maple syrup and berries.",
+    ]
+  },
+  {
+    id: 12,
+    name: "Cheesy Garlic Bread",
+    category: "Snacks",
+    time: "15 min",
+    servings: 4,
+    rating: 4.8,
+    reviews: 503,
+    difficulty: "Easy",
+    image: "https://images.unsplash.com/photo-1573140401552-3fab0b24306f?w=800&q=80",
+    badge: "Quick",
+    badgeColor: "badge-green",
+    description: "Golden, gooey garlic bread smothered in butter, garlic and melted mozzarella. Irresistible!",
+    ingredients: [
+      { name: "French Baguette", amount: "1 loaf" },
+      { name: "Butter", amount: "6 tbsp, softened" },
+      { name: "Garlic", amount: "4 cloves, minced" },
+      { name: "Mozzarella", amount: "1 cup shredded" },
+      { name: "Parmesan", amount: "¼ cup grated" },
+      { name: "Parsley", amount: "2 tbsp, chopped" },
+    ],
+    steps: [
+      "Preheat oven to 200°C.",
+      "Mix butter with garlic and parsley.",
+      "Halve baguette lengthwise. Spread garlic butter generously.",
+      "Top with mozzarella and parmesan.",
+      "Bake 10–12 minutes until cheese is bubbly and golden.",
+    ]
+  },
+  {
+    id: 13,
+    name: "Strawberry Cheesecake",
+    category: "Desserts",
+    time: "4h",
+    servings: 8,
+    rating: 4.9,
+    reviews: 621,
+    difficulty: "Medium",
+    image: "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=800&q=80",
+    badge: "Trending",
+    badgeColor: "badge-gold",
+    description: "Creamy no-bake cheesecake on a buttery biscuit base, topped with fresh strawberry coulis.",
+    ingredients: [
+      { name: "Digestive Biscuits", amount: "250g, crushed" },
+      { name: "Butter", amount: "100g, melted" },
+      { name: "Cream Cheese", amount: "600g, full fat" },
+      { name: "Whipping Cream", amount: "300ml" },
+      { name: "Icing Sugar", amount: "150g" },
+      { name: "Fresh Strawberries", amount: "400g" },
+      { name: "Vanilla Extract", amount: "1 tsp" },
+      { name: "Gelatin", amount: "2 tsp" },
+    ],
+    steps: [
+      "Mix crushed biscuits with melted butter. Press into springform pan. Chill 30 minutes.",
+      "Beat cream cheese, icing sugar and vanilla until smooth.",
+      "Whip cream to soft peaks. Fold into cream cheese mixture.",
+      "Pour over biscuit base. Chill at least 4 hours or overnight.",
+      "Blend half the strawberries for coulis. Decorate with remaining fresh strawberries.",
+    ]
+  },
+];
+
+const categories = [
+  { name: "Breakfast", emoji: "🌅", image: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=400&q=80", gradient: "linear-gradient(135deg,rgba(255,107,53,0.7),rgba(244,164,53,0.7))" },
+  { name: "Lunch", emoji: "☀️", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80", gradient: "linear-gradient(135deg,rgba(59,175,122,0.7),rgba(244,164,53,0.7))" },
+  { name: "Dinner", emoji: "🌙", image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80", gradient: "linear-gradient(135deg,rgba(26,18,7,0.6),rgba(255,107,53,0.5))" },
+  { name: "Snacks", emoji: "🍿", image: "https://images.unsplash.com/photo-1570696516188-ade861b84a49?w=400&q=80", gradient: "linear-gradient(135deg,rgba(244,164,53,0.7),rgba(255,107,53,0.7))" },
+  { name: "Desserts", emoji: "🍰", image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&q=80", gradient: "linear-gradient(135deg,rgba(232,75,58,0.6),rgba(244,164,53,0.6))" },
+  { name: "Drinks", emoji: "🥤", image: "https://images.unsplash.com/photo-1532347922424-90b71a0ec001?w=400&q=80", gradient: "linear-gradient(135deg,rgba(59,175,122,0.7),rgba(26,18,7,0.5))" },
+];
+
+// ══════════════════════════════
+// STATE
+// ══════════════════════════════
+let favorites = new Set();
+let currentScreen = 'home';
+let currentRecipeId = null;
+let previousScreen = 'home';
+
+// ══════════════════════════════
+// RENDER FUNCTIONS
+// ══════════════════════════════
+function makeCard(recipe, wide = false) {
+  const liked = favorites.has(recipe.id);
+  return `
+    <div class="recipe-card" onclick="openRecipe(${recipe.id})">
+      <img class="recipe-card-img" src="${recipe.image}" alt="${recipe.name}" loading="lazy">
+      <button class="heart-btn ${liked ? 'liked' : ''}" onclick="event.stopPropagation();toggleFav(${recipe.id},this)">
+        ${liked ? '❤️' : '🤍'}
+      </button>
+      <div class="recipe-card-body">
+        <div class="recipe-card-name">${recipe.name}</div>
+        <div class="recipe-card-meta">
+          <span class="recipe-time">⏱ ${recipe.time}</span>
+          <span class="recipe-rating">⭐ ${recipe.rating}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function makeGridCard(recipe) {
+  const liked = favorites.has(recipe.id);
+  return `
+    <div class="recipe-grid-card" onclick="openRecipe(${recipe.id})">
+      <img src="${recipe.image}" alt="${recipe.name}" loading="lazy">
+      <button class="heart-btn ${liked ? 'liked' : ''}" onclick="event.stopPropagation();toggleFav(${recipe.id},this)">
+        ${liked ? '❤️' : '🤍'}
+      </button>
+      <div class="recipe-grid-body">
+        <div class="badge ${recipe.badgeColor}">${recipe.badge}</div>
+        <div class="recipe-grid-name">${recipe.name}</div>
+        <div class="recipe-card-meta">
+          <span class="recipe-time">⏱ ${recipe.time}</span>
+          <span class="recipe-rating">⭐ ${recipe.rating}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderHome() {
+  // Popular (high rating)
+  const popular = recipes.filter(r => r.rating >= 4.8).slice(0, 5);
+  document.getElementById('popular-scroll').innerHTML = popular.map(makeCard).join('');
+
+  // Quick (under 30 min)
+  const quick = recipes.filter(r => parseInt(r.time) <= 30 && r.time !== '4h');
+  document.getElementById('quick-scroll').innerHTML = quick.map(makeCard).join('');
+
+  // Trending
+  const trending = recipes.filter(r => r.badge === 'Trending' || r.badge === 'Popular').slice(0, 4);
+  document.getElementById('trending-grid').innerHTML = trending.map(makeGridCard).join('');
+
+  // Healthy
+  const healthy = recipes.filter(r => r.badge === 'Healthy');
+  document.getElementById('healthy-scroll').innerHTML = healthy.map(makeCard).join('');
+}
+
+function renderCategories() {
+  const catGrid = document.getElementById('cat-grid');
+  catGrid.innerHTML = categories.map(c => {
+    const count = recipes.filter(r => r.category === c.name).length;
+    return `
+      <div class="cat-card" onclick="filterByCat('${c.name}')">
+        <img src="${c.image}" alt="${c.name}" loading="lazy">
+        <div class="cat-card-overlay" style="background:${c.gradient}">
+          <div class="cat-card-name">${c.emoji} ${c.name}</div>
+          <div class="cat-card-count">${count} recipes</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const allGrid = document.getElementById('all-recipes-grid');
+  allGrid.innerHTML = recipes.map(makeGridCard).join('');
+}
+
+function renderFavorites() {
+  const content = document.getElementById('fav-content');
+  if (favorites.size === 0) {
+    content.innerHTML = `
+      <div class="favorites-empty">
+        <div class="empty-icon">❤️</div>
+        <div class="empty-title">No favorites yet</div>
+        <div class="empty-desc">Tap the heart icon on any recipe to save it here for quick access!</div>
+      </div>
+    `;
+  } else {
+    const favRecipes = recipes.filter(r => favorites.has(r.id));
+    content.innerHTML = `<div style="height:16px"></div>` + favRecipes.map(r => `
+      <div class="fav-recipe-row" onclick="openRecipe(${r.id})">
+        <img class="fav-recipe-img" src="${r.image}" alt="${r.name}" loading="lazy">
+        <div class="fav-recipe-info">
+          <div class="fav-recipe-name">${r.name}</div>
+          <div class="fav-recipe-meta">
+            <span>⏱ ${r.time}</span>
+            <span>⭐ ${r.rating}</span>
+            <span>👥 ${r.servings} servings</span>
+          </div>
+        </div>
+        <button class="remove-fav" onclick="event.stopPropagation();removeFav(${r.id})">🗑️</button>
+      </div>
+    `).join('');
+  }
+}
+
+// ══════════════════════════════
+// NAVIGATION
+// ══════════════════════════════
+function navigate(screen) {
+  // Hide detail screen
+  document.getElementById('screen-detail').classList.remove('active');
+  document.getElementById('bottom-nav').style.display = 'flex';
+
+  const screens = ['home', 'categories', 'favorites', 'profile'];
+  screens.forEach(s => {
+    document.getElementById(`screen-${s}`).classList.remove('active');
+    const nav = document.getElementById(`nav-${s}`);
+    if (nav) {
+      nav.classList.remove('active');
+      nav.querySelectorAll('svg path, svg rect, svg circle, svg line').forEach(el => {
+        el.setAttribute('stroke', '#8C7A6B');
+      });
+    }
+  });
+
+  document.getElementById(`screen-${screen}`).classList.add('active');
+  const activeNav = document.getElementById(`nav-${screen}`);
+  if (activeNav) {
+    activeNav.classList.add('active');
+    activeNav.querySelectorAll('svg path, svg rect, svg circle, svg line').forEach(el => {
+      el.setAttribute('stroke', '#FF6B35');
+    });
+  }
+
+  currentScreen = screen;
+
+  if (screen === 'categories') renderCategories();
+  if (screen === 'favorites') renderFavorites();
+
+  updateFavCounts();
+}
+
+// ══════════════════════════════
+// RECIPE DETAIL
+// ══════════════════════════════
+function openRecipe(id) {
+  previousScreen = currentScreen;
+  const recipe = recipes.find(r => r.id === id);
+  currentRecipeId = id;
+
+  // Hide all screens
+  ['home','categories','favorites','profile'].forEach(s => {
+    document.getElementById(`screen-${s}`).classList.remove('active');
+  });
+  document.getElementById('bottom-nav').style.display = 'none';
+
+  // Set hero
+  document.getElementById('detail-img').src = recipe.image;
+  document.getElementById('detail-title').textContent = recipe.name;
+  document.getElementById('detail-tag').textContent = recipe.category;
+
+  // Fav btn
+  updateDetailFavBtn();
+
+  // Build body
+  const starsStr = '⭐'.repeat(Math.floor(recipe.rating));
+  const body = document.getElementById('detail-body');
+  body.innerHTML = `
+    <div class="detail-stats">
+      <div class="stat-chip">
+        <div class="stat-icon">⏱</div>
+        <div class="stat-val">${recipe.time}</div>
+        <div class="stat-label">Cook Time</div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-icon">👥</div>
+        <div class="stat-val">${recipe.servings}</div>
+        <div class="stat-label">Servings</div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-icon">📊</div>
+        <div class="stat-val">${recipe.difficulty}</div>
+        <div class="stat-label">Difficulty</div>
+      </div>
+    </div>
+
+    <div class="detail-rating">
+      <div class="stars">${starsStr}</div>
+      <div class="rating-val">${recipe.rating}</div>
+      <div class="rating-count">(${recipe.reviews} reviews)</div>
+    </div>
+
+    <p style="font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:20px;">${recipe.description}</p>
+
+    <div class="detail-section-title">🛒 Ingredients</div>
+    <ul class="ingredient-list">
+      ${recipe.ingredients.map(ing => `
+        <li class="ingredient-item">
+          <div class="ingredient-dot"></div>
+          <span class="ingredient-name">${ing.name}</span>
+          <span class="ingredient-amount">${ing.amount}</span>
+        </li>
+      `).join('')}
+    </ul>
+
+    <div class="detail-section-title">👨‍🍳 Instructions</div>
+    <ul class="step-list">
+      ${recipe.steps.map((step, i) => `
+        <li class="step-item">
+          <div class="step-num">${i+1}</div>
+          <div class="step-text">${step}</div>
+        </li>
+      `).join('')}
+    </ul>
+
+    <div class="detail-section-title">🎬 Video Tutorial</div>
+    <div class="video-section" onclick="showToast('Video player coming soon!')">
+      <div class="video-play">▶</div>
+      <div class="video-label">Watch: How to make ${recipe.name}</div>
+    </div>
+
+    <button class="add-fav-btn" id="add-fav-main-btn" onclick="toggleDetailFav()">
+      ${favorites.has(id) ? '❤️ Remove from Favorites' : '🤍 Add to Favorites'}
+    </button>
+  `;
+
+  document.getElementById('screen-detail').classList.add('active');
+  document.getElementById('screen-detail').scrollTop = 0;
+}
+
+function closeDetail() {
+  document.getElementById('screen-detail').classList.remove('active');
+  document.getElementById('bottom-nav').style.display = 'flex';
+  navigate(previousScreen);
+}
+
+function updateDetailFavBtn() {
+  const btn = document.getElementById('detail-fav-btn');
+  if (btn) btn.textContent = favorites.has(currentRecipeId) ? '❤️' : '🤍';
+  const mainBtn = document.getElementById('add-fav-main-btn');
+  if (mainBtn) mainBtn.textContent = favorites.has(currentRecipeId) ? '❤️ Remove from Favorites' : '🤍 Add to Favorites';
+}
+
+function toggleDetailFav() {
+  if (!currentRecipeId && currentRecipeId !== 0) return;
+  const recipe = recipes.find(r => r.id === currentRecipeId);
+  if (favorites.has(currentRecipeId)) {
+    favorites.delete(currentRecipeId);
+    showToast(`Removed "${recipe.name}" from favorites`);
+  } else {
+    favorites.add(currentRecipeId);
+    showToast(`❤️ Added "${recipe.name}" to favorites!`);
+  }
+  updateDetailFavBtn();
+  updateFavCounts();
+}
+
+// ══════════════════════════════
+// FAVORITES
+// ══════════════════════════════
+function toggleFav(id, btn) {
+  const recipe = recipes.find(r => r.id === id);
+  if (favorites.has(id)) {
+    favorites.delete(id);
+    btn.textContent = '🤍';
+    btn.classList.remove('liked');
+    showToast(`Removed from favorites`);
+  } else {
+    favorites.add(id);
+    btn.textContent = '❤️';
+    btn.classList.add('liked');
+    showToast(`❤️ Saved to favorites!`);
+  }
+  updateFavCounts();
+}
+
+function removeFav(id) {
+  favorites.delete(id);
+  showToast('Removed from favorites');
+  renderFavorites();
+  updateFavCounts();
+}
+
+function updateFavCounts() {
+  const count = favorites.size;
+  const el = document.getElementById('fav-count-home');
+  if (el) el.textContent = count;
+  const profileEl = document.getElementById('profile-fav-count');
+  if (profileEl) profileEl.textContent = count;
+}
+
+// ══════════════════════════════
+// CATEGORY FILTER
+// ══════════════════════════════
+function filterCategory(el, cat) {
+  document.querySelectorAll('#cat-scroll .cat-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+
+  const filtered = cat === 'All' ? recipes : recipes.filter(r => r.category === cat);
+
+  // Update popular scroll
+  document.getElementById('popular-scroll').innerHTML = filtered.slice(0, 5).map(makeCard).join('');
+}
+
+function filterByCat(cat) {
+  navigate('categories');
+  const grid = document.getElementById('all-recipes-grid');
+  const filtered = recipes.filter(r => r.category === cat);
+  grid.innerHTML = filtered.map(makeGridCard).join('');
+}
+
+// ══════════════════════════════
+// SEARCH
+// ══════════════════════════════
+function handleSearch(val) {
+  if (!val) {
+    renderHome();
+    return;
+  }
+  const q = val.toLowerCase();
+  const results = recipes.filter(r =>
+    r.name.toLowerCase().includes(q) ||
+    r.category.toLowerCase().includes(q) ||
+    r.description.toLowerCase().includes(q)
+  );
+
+  document.getElementById('popular-scroll').innerHTML =
+    results.length ? results.map(makeCard).join('') :
+    '<div style="padding:20px;color:var(--muted);font-size:14px;">No recipes found 😢</div>';
+  document.getElementById('quick-scroll').innerHTML = '';
+  document.getElementById('trending-grid').innerHTML = '';
+  document.getElementById('healthy-scroll').innerHTML = '';
+}
+
+function focusSearch() {
+  document.getElementById('search-input').focus();
+}
+
+// ══════════════════════════════
+// FILTER MODAL
+// ══════════════════════════════
+function openFilter() {
+  document.getElementById('filter-modal').classList.add('open');
+}
+
+function closeFilter(e) {
+  if (e.target === document.getElementById('filter-modal')) {
+    document.getElementById('filter-modal').classList.remove('open');
+  }
+}
+
+function applyFilter() {
+  document.getElementById('filter-modal').classList.remove('open');
+  showToast('Filters applied!');
+}
+
+function toggleFchip(el) {
+  el.classList.toggle('selected');
+}
+
+// ══════════════════════════════
+// TOAST
+// ══════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ══════════════════════════════
+// DARK MODE
+// ══════════════════════════════
+let darkMode = false;
+function toggleDark() {
+  darkMode = !darkMode;
+  const root = document.documentElement;
+  if (darkMode) {
+    root.style.setProperty('--warm-bg', '#1A1207');
+    root.style.setProperty('--cream', '#231A0E');
+    root.style.setProperty('--dark', '#FFF9F2');
+    root.style.setProperty('--text', '#EDE3D8');
+    root.style.setProperty('--muted', '#8C7A6B');
+    root.style.setProperty('--border', '#2D2010');
+    document.querySelectorAll('.recipe-card, .recipe-grid-card, .stat-chip, .menu-item, .fav-recipe-row, .profile-stats').forEach(el => {
+      el.style.background = '#231A0E';
+    });
+    document.getElementById('dark-toggle').textContent = '☀️';
+    showToast('🌙 Dark mode on');
+  } else {
+    root.style.setProperty('--warm-bg', '#FFF9F2');
+    root.style.setProperty('--cream', '#FDF6EC');
+    root.style.setProperty('--dark', '#1A1207');
+    root.style.setProperty('--text', '#2D2010');
+    root.style.setProperty('--muted', '#8C7A6B');
+    root.style.setProperty('--border', '#EDE3D8');
+    document.querySelectorAll('.recipe-card, .recipe-grid-card, .stat-chip, .menu-item, .fav-recipe-row, .profile-stats').forEach(el => {
+      el.style.background = '';
+    });
+    document.getElementById('dark-toggle').textContent = '🌙';
+    showToast('☀️ Light mode on');
+  }
+}
+
+// ══════════════════════════════
+// INIT
+// ══════════════════════════════
+renderHome();
+navigate('home');
+</script>
+</body>
+</html>
