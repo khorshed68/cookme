@@ -125,7 +125,7 @@
   /* ── HOME SCREEN ── */
   .home-header {
     background: linear-gradient(160deg, #FF6B35 0%, #F4A435 100%);
-    padding: 20px 20px 28px;
+    padding: 20px 20px 40px;
     position: relative;
     overflow: hidden;
   }
@@ -151,12 +151,18 @@
   .header-top {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 18px;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 22px;
   }
 
-  .greeting { color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 400; }
-  .user-name { color: #fff; font-size: 18px; font-weight: 700; font-family: var(--font-display); }
+  .header-top > div:first-child {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .greeting { color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 400; line-height: 1.2; }
+  .user-name { color: #fff; font-size: 18px; font-weight: 700; font-family: var(--font-display); line-height: 1.15; margin-top: 2px; }
 
   .avatar {
     width: 42px; height: 42px; border-radius: 50%;
@@ -165,6 +171,8 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 18px;
     cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
   }
 
   .search-bar {
@@ -223,6 +231,8 @@
     background: var(--orange-pale);
     padding: 4px 10px;
     border-radius: 20px;
+    border: none;
+    font-family: var(--font-body);
   }
 
   /* CATEGORY SCROLL */
@@ -862,6 +872,32 @@
     position: sticky;
     top: 0;
     z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .screen-back-btn {
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--dark);
+    box-shadow: 0 2px 10px rgba(26,18,7,0.08);
+    cursor: pointer;
+    flex-shrink: 0;
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .screen-back-btn:active { transform: scale(0.95); }
+
+  .screen-header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
   }
 
   .screen-header-title {
@@ -869,6 +905,96 @@
     font-size: 20px;
     font-weight: 700;
     color: var(--dark);
+  }
+
+  .shopping-list-summary {
+    margin: 16px 20px 12px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .shopping-list-summary strong {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 18px;
+    color: var(--dark);
+  }
+
+  .shopping-list-summary span {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .shopping-list-items {
+    padding: 0 20px 16px;
+  }
+
+  .shopping-list-item {
+    background: #fff;
+    border-radius: 16px;
+    padding: 14px 16px;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 12px;
+  }
+
+  .shopping-list-item-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .shopping-list-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 4px;
+  }
+
+  .shopping-list-amount {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .shopping-list-recipes {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .shopping-list-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 28px;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .shopping-list-empty-icon {
+    font-size: 56px;
+  }
+
+  .shopping-list-empty-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  .shopping-list-empty-desc {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
   }
 
   /* TOAST */
@@ -1015,7 +1141,7 @@
     border-radius: 50%;
     background: var(--red);
     position: absolute;
-    top: 2px; right: 2px;
+    top: -1px; right: -1px;
     border: 1.5px solid #fff;
   }
 </style>
@@ -1053,7 +1179,7 @@
       <div class="search-bar" onclick="focusSearch()">
         <svg width="16" height="16" fill="none" stroke="#8C7A6B" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
         <input type="text" id="search-input" placeholder="Search recipes, ingredients…" oninput="handleSearch(this.value)">
-        <button class="filter-btn" onclick="openFilter()">
+        <button class="filter-btn" onclick="event.stopPropagation();openFilter()">
           <svg width="14" height="14" fill="none" stroke="#FF6B35" stroke-width="2" viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
         </button>
       </div>
@@ -1063,12 +1189,12 @@
     <div class="quick-stats">
       <div class="qstat">
         <div class="qstat-icon">🍽️</div>
-        <div class="qstat-num">247</div>
+        <div class="qstat-num" id="recipe-count-home">0</div>
         <div class="qstat-label">Recipes</div>
       </div>
       <div class="qstat">
         <div class="qstat-icon">⭐</div>
-        <div class="qstat-num">4.8</div>
+        <div class="qstat-num" id="avg-rating-home">0.0</div>
         <div class="qstat-label">Avg Rating</div>
       </div>
       <div class="qstat">
@@ -1097,7 +1223,7 @@
     <!-- Featured Recipe -->
     <div class="section-header">
       <div class="section-title">Featured Today</div>
-      <div class="see-all" onclick="navigate('categories')">See all</div>
+      <div class="see-all" onclick="openBrowseSection('all')">See all</div>
     </div>
     <div class="featured-banner" onclick="openRecipe(0)">
       <img src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800&q=80" alt="Featured Recipe" loading="lazy">
@@ -1115,28 +1241,28 @@
     <!-- Popular Recipes -->
     <div class="section-header">
       <div class="section-title">🔥 Popular Now</div>
-      <div class="see-all">See all</div>
+      <div class="see-all" onclick="openBrowseSection('popular')">See all</div>
     </div>
     <div class="cards-scroll" id="popular-scroll"></div>
 
     <!-- Quick (Under 30min) -->
     <div class="section-header">
       <div class="section-title">⚡ Quick Recipes</div>
-      <div class="see-all">See all</div>
+      <div class="see-all" onclick="openBrowseSection('quick')">See all</div>
     </div>
     <div class="cards-scroll" id="quick-scroll"></div>
 
     <!-- Trending -->
     <div class="section-header">
       <div class="section-title">📈 Trending</div>
-      <div class="see-all">See all</div>
+      <div class="see-all" onclick="openBrowseSection('trending')">See all</div>
     </div>
     <div class="recipe-grid" id="trending-grid"></div>
 
     <!-- Healthy -->
     <div class="section-header">
       <div class="section-title">🥗 Healthy Picks</div>
-      <div class="see-all">See all</div>
+      <div class="see-all" onclick="openBrowseSection('healthy')">See all</div>
     </div>
     <div class="cards-scroll" id="healthy-scroll"></div>
 
@@ -1145,7 +1271,10 @@
   <!-- ══════════ CATEGORIES SCREEN ══════════ -->
   <div class="screen" id="screen-categories">
     <div class="screen-header">
-      <div class="screen-header-title">🍽️ All Categories</div>
+      <button class="screen-back-btn" onclick="goBack()" aria-label="Go back">←</button>
+      <div class="screen-header-content">
+        <div class="screen-header-title">🍽️ All Categories</div>
+      </div>
     </div>
     <div class="cat-grid" id="cat-grid"></div>
     <div class="section-header">
@@ -1157,13 +1286,34 @@
   <!-- ══════════ FAVORITES SCREEN ══════════ -->
   <div class="screen" id="screen-favorites">
     <div class="screen-header">
-      <div class="screen-header-title">❤️ My Favorites</div>
+      <button class="screen-back-btn" onclick="goBack()" aria-label="Go back">←</button>
+      <div class="screen-header-content">
+        <div class="screen-header-title">❤️ My Favorites</div>
+      </div>
     </div>
     <div id="fav-content"></div>
   </div>
 
+  <!-- ══════════ SHOPPING LIST SCREEN ══════════ -->
+  <div class="screen" id="screen-shopping-list">
+    <div class="screen-header">
+      <button class="screen-back-btn" onclick="goBack()" aria-label="Go back">←</button>
+      <div class="screen-header-content">
+        <div class="screen-header-title">🛒 Shopping List</div>
+      </div>
+    </div>
+    <div class="shopping-list-summary" id="shopping-list-summary"></div>
+    <div class="shopping-list-items" id="shopping-list-items"></div>
+  </div>
+
   <!-- ══════════ PROFILE SCREEN ══════════ -->
   <div class="screen" id="screen-profile">
+    <div class="screen-header">
+      <button class="screen-back-btn" onclick="goBack()" aria-label="Go back">←</button>
+      <div class="screen-header-content">
+        <div class="screen-header-title">👤 Profile</div>
+      </div>
+    </div>
     <div class="profile-header-section">
       <div class="profile-avatar">👨‍🍳</div>
       <div class="profile-name">Alex Johnson</div>
@@ -1184,37 +1334,37 @@
       </div>
     </div>
     <div class="profile-menu">
-      <div class="menu-item">
+      <div class="menu-item" onclick="openBrowseSection('all')" style="cursor:pointer;">
         <div class="menu-icon" style="background:#FFF0E8;">🍳</div>
         <div class="menu-label">My Recipes</div>
         <div class="menu-arrow">›</div>
       </div>
-      <div class="menu-item">
+        <div class="menu-item" onclick="openShoppingList()" style="cursor:pointer;">
         <div class="menu-icon" style="background:#E8F8F1;">🛒</div>
         <div class="menu-label">Shopping List</div>
         <div class="menu-arrow">›</div>
       </div>
-      <div class="menu-item">
+      <div class="menu-item" onclick="showToast('Meal Planner coming soon!')" style="cursor:pointer;">
         <div class="menu-icon" style="background:#FFF4DC;">📅</div>
         <div class="menu-label">Meal Planner</div>
         <div class="menu-arrow">›</div>
       </div>
-      <div class="menu-item">
+      <div class="menu-item" onclick="showToast('No new notifications')" style="cursor:pointer;">
         <div class="menu-icon" style="background:#FDECEA;">🔔</div>
         <div class="menu-label">Notifications</div>
         <div class="menu-arrow">›</div>
       </div>
-      <div class="menu-item">
+      <div class="menu-item" onclick="toggleDark()" style="cursor:pointer;">
         <div class="menu-icon" style="background:#F0F0FF;">🌙</div>
         <div class="menu-label">Dark Mode</div>
-        <div class="menu-arrow" id="dark-toggle" onclick="toggleDark()" style="cursor:pointer;font-size:20px;">🌙</div>
+        <div class="menu-arrow" id="dark-toggle" style="font-size:20px;">🌙</div>
       </div>
-      <div class="menu-item">
+      <div class="menu-item" onclick="showToast('Settings coming soon!')" style="cursor:pointer;">
         <div class="menu-icon" style="background:#F5F5F5;">⚙️</div>
         <div class="menu-label">Settings</div>
         <div class="menu-arrow">›</div>
       </div>
-      <div class="menu-item" style="margin-top:8px;" onclick="showToast('Logged out successfully')">
+      <div class="menu-item" style="margin-top:8px;" onclick="logout()">
         <div class="menu-icon" style="background:#FDECEA;">🚪</div>
         <div class="menu-label" style="color:#E84B3A;">Log Out</div>
         <div class="menu-arrow">›</div>
@@ -1282,8 +1432,9 @@
     <div class="filter-group">
       <div class="filter-group-label">Cooking Time</div>
       <div class="filter-chips">
+        <button class="fchip selected" onclick="toggleFchip(this)">All</button>
         <button class="fchip" onclick="toggleFchip(this)">Under 15 min</button>
-        <button class="fchip selected" onclick="toggleFchip(this)">Under 30 min</button>
+        <button class="fchip" onclick="toggleFchip(this)">Under 30 min</button>
         <button class="fchip" onclick="toggleFchip(this)">Under 1 hour</button>
         <button class="fchip" onclick="toggleFchip(this)">1+ hours</button>
       </div>
@@ -1291,7 +1442,8 @@
     <div class="filter-group">
       <div class="filter-group-label">Difficulty</div>
       <div class="filter-chips">
-        <button class="fchip selected" onclick="toggleFchip(this)">Easy</button>
+        <button class="fchip selected" onclick="toggleFchip(this)">All</button>
+        <button class="fchip" onclick="toggleFchip(this)">Easy</button>
         <button class="fchip" onclick="toggleFchip(this)">Medium</button>
         <button class="fchip" onclick="toggleFchip(this)">Hard</button>
       </div>
@@ -1750,6 +1902,120 @@ let favorites = new Set();
 let currentScreen = 'home';
 let currentRecipeId = null;
 let previousScreen = 'home';
+let activeCategory = 'All';
+let activeTimeFilter = 'All';
+let activeDifficultyFilter = 'All';
+let searchQuery = '';
+let browseSection = 'all';
+let navigationHistory = [];
+
+function getRecipeMinutes(time) {
+  const minuteMatch = time.match(/(\d+)\s*min/i);
+  if (minuteMatch) {
+    return Number(minuteMatch[1]);
+  }
+
+  const hourMatch = time.match(/(\d+)\s*h/i);
+  if (hourMatch) {
+    return Number(hourMatch[1]) * 60;
+  }
+
+  const parsed = Number.parseInt(time, 10);
+  return Number.isNaN(parsed) ? Number.POSITIVE_INFINITY : parsed;
+}
+
+function recipeMatchesActiveFilters(recipe) {
+  if (activeCategory !== 'All' && recipe.category !== activeCategory) {
+    return false;
+  }
+
+  if (activeDifficultyFilter !== 'All' && recipe.difficulty !== activeDifficultyFilter) {
+    return false;
+  }
+
+  if (activeTimeFilter !== 'All') {
+    const minutes = getRecipeMinutes(recipe.time);
+    if (activeTimeFilter === 'Under 15 min' && minutes > 15) return false;
+    if (activeTimeFilter === 'Under 30 min' && minutes > 30) return false;
+    if (activeTimeFilter === 'Under 1 hour' && minutes > 60) return false;
+    if (activeTimeFilter === '1+ hours' && minutes < 60) return false;
+  }
+
+  if (searchQuery) {
+    const query = searchQuery.toLowerCase();
+    const searchable = [recipe.name, recipe.category, recipe.description].join(' ').toLowerCase();
+    if (!searchable.includes(query)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function getVisibleRecipes() {
+  return recipes.filter(recipeMatchesActiveFilters);
+}
+
+function getBrowseRecipes() {
+  const visibleRecipes = getVisibleRecipes();
+
+  if (browseSection === 'popular') {
+    return visibleRecipes.filter(recipe => recipe.rating >= 4.8);
+  }
+
+  if (browseSection === 'quick') {
+    return visibleRecipes.filter(recipe => getRecipeMinutes(recipe.time) <= 30);
+  }
+
+  if (browseSection === 'trending') {
+    return visibleRecipes.filter(recipe => recipe.badge === 'Trending' || recipe.badge === 'Popular');
+  }
+
+  if (browseSection === 'healthy') {
+    return visibleRecipes.filter(recipe => recipe.badge === 'Healthy');
+  }
+
+  return visibleRecipes;
+}
+
+function syncCategoryChips() {
+  document.querySelectorAll('#cat-scroll .cat-chip').forEach(chip => {
+    chip.classList.toggle('active', chip.dataset.cat === activeCategory);
+  });
+}
+
+function syncFilterModalSelections() {
+  const modal = document.getElementById('filter-modal');
+  if (!modal) {
+    return;
+  }
+
+  const groups = modal.querySelectorAll('.filter-group');
+  const categoryButtons = groups[0]?.querySelectorAll('.fchip') || [];
+  const timeButtons = groups[1]?.querySelectorAll('.fchip') || [];
+  const difficultyButtons = groups[2]?.querySelectorAll('.fchip') || [];
+
+  categoryButtons.forEach(button => button.classList.toggle('selected', button.textContent.trim() === activeCategory));
+  timeButtons.forEach(button => button.classList.toggle('selected', button.textContent.trim() === activeTimeFilter));
+  difficultyButtons.forEach(button => button.classList.toggle('selected', button.textContent.trim() === activeDifficultyFilter));
+}
+
+function refreshVisibleRecipes() {
+  if (currentScreen === 'home') {
+    renderHome();
+  } else if (currentScreen === 'categories') {
+    renderCategories();
+  } else if (currentScreen === 'favorites') {
+    renderFavorites();
+  }
+
+  if (currentRecipeId !== null) {
+    updateDetailFavBtn();
+  }
+
+  updateFavCounts();
+  updateQuickStats();
+}
 
 // ══════════════════════════════
 // RENDER FUNCTIONS
@@ -1794,21 +2060,35 @@ function makeGridCard(recipe) {
 }
 
 function renderHome() {
+  syncCategoryChips();
+
+  const visibleRecipes = getVisibleRecipes();
+
+  if (visibleRecipes.length === 0) {
+    document.getElementById('popular-scroll').innerHTML = '<div style="padding:20px;color:var(--muted);font-size:14px;">No recipes found 😢</div>';
+    document.getElementById('quick-scroll').innerHTML = '';
+    document.getElementById('trending-grid').innerHTML = '';
+    document.getElementById('healthy-scroll').innerHTML = '';
+    return;
+  }
+
   // Popular (high rating)
-  const popular = recipes.filter(r => r.rating >= 4.8).slice(0, 5);
+  const popular = visibleRecipes.filter(r => r.rating >= 4.8).slice(0, 5);
   document.getElementById('popular-scroll').innerHTML = popular.map(makeCard).join('');
 
   // Quick (under 30 min)
-  const quick = recipes.filter(r => parseInt(r.time) <= 30 && r.time !== '4h');
+  const quick = visibleRecipes.filter(r => getRecipeMinutes(r.time) <= 30);
   document.getElementById('quick-scroll').innerHTML = quick.map(makeCard).join('');
 
   // Trending
-  const trending = recipes.filter(r => r.badge === 'Trending' || r.badge === 'Popular').slice(0, 4);
+  const trending = visibleRecipes.filter(r => r.badge === 'Trending' || r.badge === 'Popular').slice(0, 4);
   document.getElementById('trending-grid').innerHTML = trending.map(makeGridCard).join('');
 
   // Healthy
-  const healthy = recipes.filter(r => r.badge === 'Healthy');
+  const healthy = visibleRecipes.filter(r => r.badge === 'Healthy');
   document.getElementById('healthy-scroll').innerHTML = healthy.map(makeCard).join('');
+
+  updateQuickStats();
 }
 
 function renderCategories() {
@@ -1827,7 +2107,7 @@ function renderCategories() {
   }).join('');
 
   const allGrid = document.getElementById('all-recipes-grid');
-  allGrid.innerHTML = recipes.map(makeGridCard).join('');
+  allGrid.innerHTML = getBrowseRecipes().map(makeGridCard).join('');
 }
 
 function renderFavorites() {
@@ -1862,12 +2142,16 @@ function renderFavorites() {
 // ══════════════════════════════
 // NAVIGATION
 // ══════════════════════════════
-function navigate(screen) {
+function navigate(screen, skipHistory = false) {
+  if (!skipHistory && currentScreen !== screen) {
+    navigationHistory.push(currentScreen);
+  }
+
   // Hide detail screen
   document.getElementById('screen-detail').classList.remove('active');
   document.getElementById('bottom-nav').style.display = 'flex';
 
-  const screens = ['home', 'categories', 'favorites', 'profile'];
+  const screens = ['home', 'categories', 'favorites', 'profile', 'shopping-list'];
   screens.forEach(s => {
     document.getElementById(`screen-${s}`).classList.remove('active');
     const nav = document.getElementById(`nav-${s}`);
@@ -1890,10 +2174,20 @@ function navigate(screen) {
 
   currentScreen = screen;
 
+  if (screen !== 'categories') {
+    browseSection = 'all';
+  }
+
   if (screen === 'categories') renderCategories();
   if (screen === 'favorites') renderFavorites();
+  if (screen === 'shopping-list') renderShoppingList();
 
   updateFavCounts();
+}
+
+function goBack() {
+  const previousScreen = navigationHistory.pop() || 'home';
+  navigate(previousScreen, true);
 }
 
 // ══════════════════════════════
@@ -2007,8 +2301,8 @@ function toggleDetailFav() {
     favorites.add(currentRecipeId);
     showToast(`❤️ Added "${recipe.name}" to favorites!`);
   }
+  refreshVisibleRecipes();
   updateDetailFavBtn();
-  updateFavCounts();
 }
 
 // ══════════════════════════════
@@ -2027,14 +2321,13 @@ function toggleFav(id, btn) {
     btn.classList.add('liked');
     showToast(`❤️ Saved to favorites!`);
   }
-  updateFavCounts();
+  refreshVisibleRecipes();
 }
 
 function removeFav(id) {
   favorites.delete(id);
   showToast('Removed from favorites');
-  renderFavorites();
-  updateFavCounts();
+  refreshVisibleRecipes();
 }
 
 function updateFavCounts() {
@@ -2045,47 +2338,154 @@ function updateFavCounts() {
   if (profileEl) profileEl.textContent = count;
 }
 
+function updateQuickStats() {
+  const visibleRecipes = getVisibleRecipes();
+  const recipeCountEl = document.getElementById('recipe-count-home');
+  if (recipeCountEl) recipeCountEl.textContent = visibleRecipes.length;
+
+  const avgRatingEl = document.getElementById('avg-rating-home');
+  if (avgRatingEl) {
+    const averageRating = visibleRecipes.length
+      ? visibleRecipes.reduce((sum, recipe) => sum + recipe.rating, 0) / visibleRecipes.length
+      : 0;
+    avgRatingEl.textContent = averageRating.toFixed(1);
+  }
+}
+
 // ══════════════════════════════
 // CATEGORY FILTER
 // ══════════════════════════════
 function filterCategory(el, cat) {
-  document.querySelectorAll('#cat-scroll .cat-chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-
-  const filtered = cat === 'All' ? recipes : recipes.filter(r => r.category === cat);
-
-  // Update popular scroll
-  document.getElementById('popular-scroll').innerHTML = filtered.slice(0, 5).map(makeCard).join('');
+  activeCategory = cat;
+  syncCategoryChips();
+  syncFilterModalSelections();
+  refreshVisibleRecipes();
 }
 
 function filterByCat(cat) {
+  activeCategory = cat;
+  browseSection = 'all';
   navigate('categories');
-  const grid = document.getElementById('all-recipes-grid');
-  const filtered = recipes.filter(r => r.category === cat);
-  grid.innerHTML = filtered.map(makeGridCard).join('');
+  syncCategoryChips();
+  syncFilterModalSelections();
+  renderCategories();
+}
+
+function openBrowseSection(section) {
+  browseSection = section;
+  navigate('categories');
+  renderCategories();
+}
+
+function buildShoppingList() {
+  const favoriteRecipes = recipes.filter(recipe => favorites.has(recipe.id));
+  const itemsByName = new Map();
+
+  favoriteRecipes.forEach(recipe => {
+    recipe.ingredients.forEach(ingredient => {
+      const existing = itemsByName.get(ingredient.name);
+      if (existing) {
+        existing.recipes.add(recipe.name);
+        return;
+      }
+
+      itemsByName.set(ingredient.name, {
+        name: ingredient.name,
+        amount: ingredient.amount,
+        recipes: new Set([recipe.name]),
+      });
+    });
+  });
+
+  return Array.from(itemsByName.values()).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function renderShoppingList() {
+  const summary = document.getElementById('shopping-list-summary');
+  const items = document.getElementById('shopping-list-items');
+  const shoppingItems = buildShoppingList();
+
+  if (favorites.size === 0 || shoppingItems.length === 0) {
+    summary.innerHTML = `
+      <div>
+        <strong>0 items</strong>
+        <span>Add favorite recipes to build a shopping list.</span>
+      </div>
+      <div style="font-size:26px;">🛒</div>
+    `;
+    items.innerHTML = `
+      <div class="shopping-list-empty">
+        <div class="shopping-list-empty-icon">🛍️</div>
+        <div class="shopping-list-empty-title">Your list is empty</div>
+        <div class="shopping-list-empty-desc">Save recipes from the heart button, then come back here to see the ingredients you need.</div>
+      </div>
+    `;
+    return;
+  }
+
+  summary.innerHTML = `
+    <div>
+      <strong>${shoppingItems.length} items</strong>
+      <span>Built from ${favorites.size} saved recipe${favorites.size === 1 ? '' : 's'}.</span>
+    </div>
+    <div style="font-size:26px;">🛒</div>
+  `;
+
+  items.innerHTML = shoppingItems.map(item => {
+    const recipeNames = Array.from(item.recipes).join(' • ');
+    return `
+      <div class="shopping-list-item">
+        <div class="shopping-list-item-top">
+          <div>
+            <div class="shopping-list-name">${item.name}</div>
+            <div class="shopping-list-amount">${item.amount}</div>
+          </div>
+          <div style="font-size:18px;">✅</div>
+        </div>
+        <div class="shopping-list-recipes">From: ${recipeNames}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function openShoppingList() {
+  navigate('shopping-list');
+  renderShoppingList();
+}
+
+function logout() {
+  favorites.clear();
+  navigationHistory = [];
+  currentRecipeId = null;
+  currentScreen = 'home';
+  activeCategory = 'All';
+  activeTimeFilter = 'All';
+  activeDifficultyFilter = 'All';
+  searchQuery = '';
+  browseSection = 'all';
+  navigationHistory = [];
+  darkMode = false;
+
+  const root = document.documentElement;
+  root.style.setProperty('--warm-bg', '#FFF9F2');
+  root.style.setProperty('--cream', '#FDF6EC');
+  root.style.setProperty('--dark', '#1A1207');
+  root.style.setProperty('--text', '#2D2010');
+  root.style.setProperty('--muted', '#8C7A6B');
+  root.style.setProperty('--border', '#EDE3D8');
+  document.getElementById('dark-toggle').textContent = '🌙';
+  document.getElementById('search-input').value = '';
+  renderHome();
+  navigate('home', true);
+  showToast('Logged out successfully');
 }
 
 // ══════════════════════════════
 // SEARCH
 // ══════════════════════════════
 function handleSearch(val) {
-  if (!val) {
-    renderHome();
-    return;
-  }
-  const q = val.toLowerCase();
-  const results = recipes.filter(r =>
-    r.name.toLowerCase().includes(q) ||
-    r.category.toLowerCase().includes(q) ||
-    r.description.toLowerCase().includes(q)
-  );
-
-  document.getElementById('popular-scroll').innerHTML =
-    results.length ? results.map(makeCard).join('') :
-    '<div style="padding:20px;color:var(--muted);font-size:14px;">No recipes found 😢</div>';
-  document.getElementById('quick-scroll').innerHTML = '';
-  document.getElementById('trending-grid').innerHTML = '';
-  document.getElementById('healthy-scroll').innerHTML = '';
+  searchQuery = val.trim();
+  renderHome();
 }
 
 function focusSearch() {
@@ -2096,6 +2496,7 @@ function focusSearch() {
 // FILTER MODAL
 // ══════════════════════════════
 function openFilter() {
+  syncFilterModalSelections();
   document.getElementById('filter-modal').classList.add('open');
 }
 
@@ -2106,12 +2507,30 @@ function closeFilter(e) {
 }
 
 function applyFilter() {
+  const modal = document.getElementById('filter-modal');
+  const groups = modal.querySelectorAll('.filter-group');
+  const selectedCategory = groups[0]?.querySelector('.fchip.selected')?.textContent.trim() || 'All';
+  const selectedTime = groups[1]?.querySelector('.fchip.selected')?.textContent.trim() || 'All';
+  const selectedDifficulty = groups[2]?.querySelector('.fchip.selected')?.textContent.trim() || 'All';
+
+  activeCategory = selectedCategory;
+  activeTimeFilter = selectedTime;
+  activeDifficultyFilter = selectedDifficulty;
+
+  syncCategoryChips();
   document.getElementById('filter-modal').classList.remove('open');
+  refreshVisibleRecipes();
   showToast('Filters applied!');
 }
 
 function toggleFchip(el) {
-  el.classList.toggle('selected');
+  const group = el.closest('.filter-group');
+  if (!group) {
+    return;
+  }
+
+  group.querySelectorAll('.fchip').forEach(button => button.classList.remove('selected'));
+  el.classList.add('selected');
 }
 
 // ══════════════════════════════
@@ -2165,6 +2584,7 @@ function toggleDark() {
 // ══════════════════════════════
 renderHome();
 navigate('home');
+updateQuickStats();
 </script>
 </body>
 </html>
