@@ -740,6 +740,10 @@
     margin-top: 2px;
   }
 
+  #home-cat-grid {
+    padding: 4px 20px 8px;
+  }
+
   /* ── FAVORITES SCREEN ── */
   .favorites-empty {
     flex: 1;
@@ -1204,19 +1208,53 @@
       </div>
     </div>
 
-    <!-- Categories -->
-    <div>
-      <div class="section-header">
-        <div class="section-title">Categories</div>
+    <!-- Categories Grid -->
+    <div class="section-header">
+      <div class="section-title">🍽️ Categories</div>
+      <div class="see-all" onclick="navigate('categories')">See all</div>
+    </div>
+    <div class="cat-grid" id="home-cat-grid">
+      <div class="cat-card" onclick="filterCategory(null, 'Breakfast')">
+        <img src="https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400&q=80" alt="Breakfast">
+        <div class="cat-card-overlay">
+          <div class="cat-card-name">🌅 Breakfast</div>
+          <div class="cat-card-count">4 recipes</div>
+        </div>
       </div>
-      <div class="categories-scroll" id="cat-scroll">
-        <div class="cat-chip active" data-cat="All" onclick="filterCategory(this, 'All')"><span>🍽️</span> All</div>
-        <div class="cat-chip" data-cat="Breakfast" onclick="filterCategory(this, 'Breakfast')"><span>🌅</span> Breakfast</div>
-        <div class="cat-chip" data-cat="Lunch" onclick="filterCategory(this, 'Lunch')"><span>☀️</span> Lunch</div>
-        <div class="cat-chip" data-cat="Dinner" onclick="filterCategory(this, 'Dinner')"><span>🌙</span> Dinner</div>
-        <div class="cat-chip" data-cat="Snacks" onclick="filterCategory(this, 'Snacks')"><span>🍿</span> Snacks</div>
-        <div class="cat-chip" data-cat="Desserts" onclick="filterCategory(this, 'Desserts')"><span>🍰</span> Desserts</div>
-        <div class="cat-chip" data-cat="Drinks" onclick="filterCategory(this, 'Drinks')"><span>🥤</span> Drinks</div>
+      <div class="cat-card" onclick="filterCategory(null, 'Lunch')">
+        <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80" alt="Lunch">
+        <div class="cat-card-overlay">
+          <div class="cat-card-name">☀️ Lunch</div>
+          <div class="cat-card-count">3 recipes</div>
+        </div>
+      </div>
+      <div class="cat-card" onclick="filterCategory(null, 'Dinner')">
+        <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80" alt="Dinner">
+        <div class="cat-card-overlay">
+          <div class="cat-card-name">🌙 Dinner</div>
+          <div class="cat-card-count">3 recipes</div>
+        </div>
+      </div>
+      <div class="cat-card" onclick="filterCategory(null, 'Snacks')">
+        <img src="https://images.unsplash.com/photo-1599599810694-b5ac4dd33e4b?w=400&q=80" alt="Snacks">
+        <div class="cat-card-overlay">
+          <div class="cat-card-name">🍿 Snacks</div>
+          <div class="cat-card-count">1 recipes</div>
+        </div>
+      </div>
+      <div class="cat-card" onclick="filterCategory(null, 'Desserts')">
+        <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&q=80" alt="Desserts">
+        <div class="cat-card-overlay">
+          <div class="cat-card-name">🍰 Desserts</div>
+          <div class="cat-card-count">2 recipes</div>
+        </div>
+      </div>
+      <div class="cat-card" onclick="filterCategory(null, 'Drinks')">
+        <img src="https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=400&q=80" alt="Drinks">
+        <div class="cat-card-overlay">
+          <div class="cat-card-name">🥤 Drinks</div>
+          <div class="cat-card-count">1 recipes</div>
+        </div>
       </div>
     </div>
 
